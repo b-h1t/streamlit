@@ -4,7 +4,7 @@ Contains all endpoints, constants, and configuration variables.
 """
 
 # --- AZURE CONFIGURATION ---
-# These should be set in Streamlit secrets
+# These should be set in Streamlit secrets or environment variables
 AZURE_CONNECTION_STRING_KEY = 'AZURE_CONNECTION_STRING'
 AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT_KEY = 'AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT'
 AZURE_DOCUMENT_INTELLIGENCE_KEY_KEY = 'AZURE_DOCUMENT_INTELLIGENCE_KEY'

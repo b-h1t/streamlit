@@ -31,18 +31,52 @@ from config import (
 )
 
 # --- AZURE AND APP CONFIGURATION ---
-AZURE_CONNECTION_STRING = st.secrets[AZURE_CONNECTION_STRING_KEY]
-# Document Intelligence credentials are still needed for the OCR 'prebuilt-read' model
-ENDPOINT = st.secrets[AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT_KEY]
-KEY = st.secrets[AZURE_DOCUMENT_INTELLIGENCE_KEY_KEY]
+# Handle both Streamlit secrets and environment variables for Azure deployment
+try:
+    AZURE_CONNECTION_STRING = st.secrets[AZURE_CONNECTION_STRING_KEY]
+except:
+    AZURE_CONNECTION_STRING = os.getenv(AZURE_CONNECTION_STRING_KEY)
+
+try:
+    ENDPOINT = st.secrets[AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT_KEY]
+except:
+    ENDPOINT = os.getenv(AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT_KEY)
+
+try:
+    KEY = st.secrets[AZURE_DOCUMENT_INTELLIGENCE_KEY_KEY]
+except:
+    KEY = os.getenv(AZURE_DOCUMENT_INTELLIGENCE_KEY_KEY)
+
+# Set Streamlit configuration for Azure
+st.set_page_config(
+    page_title="Document Assignment & Labelling",
+    page_icon="📄",
+    layout="wide"
+)
+
+# Azure-specific configuration as per Microsoft docs
+if __name__ == '__main__':
+    st.set_option('server.enableCORS', True)
 
 # --- LLM AND COMPARISON FUNCTIONS (Updated to compare two LLMs) ---
 
 def get_llm_client():
     """Initializes and returns the Azure ChatCompletionsClient for the LLMs."""
     try:
-        endpoint = st.secrets[AZURE_LLM_ENDPOINT_KEY]
-        api_key = st.secrets[AZURE_LLM_API_KEY_KEY]
+        # Try Streamlit secrets first, then environment variables
+        try:
+            endpoint = st.secrets[AZURE_LLM_ENDPOINT_KEY]
+        except:
+            endpoint = os.getenv(AZURE_LLM_ENDPOINT_KEY)
+        
+        try:
+            api_key = st.secrets[AZURE_LLM_API_KEY_KEY]
+        except:
+            api_key = os.getenv(AZURE_LLM_API_KEY_KEY)
+        
+        if not endpoint or not api_key:
+            raise KeyError(f"Missing {AZURE_LLM_ENDPOINT_KEY} or {AZURE_LLM_API_KEY_KEY}")
+            
         return ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
     except KeyError as e:
         st.error(ERROR_MESSAGES["MISSING_SECRET"].format(e, AZURE_LLM_ENDPOINT_KEY, AZURE_LLM_API_KEY_KEY))
@@ -130,9 +164,17 @@ def classify_with_model(text_content, model_name):
         # --- IF THE MODEL IS MISTRAL, USE URLLIB REQUEST ---
         # This assumes your mistral model name in the main app block will contain "mistral"
         if "mistral" in model_name:
-            # NOTE: Ensure you have 'MISTRAL_URL' and 'AZURE_LLM_API_KEY' in your Streamlit secrets
-            url = st.secrets['AZURE_LLM_ENDPOINT']
-            api_key = st.secrets['AZURE_LLM_API_KEY']
+            # Try Streamlit secrets first, then environment variables
+            try:
+                url = st.secrets['AZURE_LLM_ENDPOINT']
+            except:
+                url = os.getenv('AZURE_LLM_ENDPOINT')
+            
+            try:
+                api_key = st.secrets['AZURE_LLM_API_KEY']
+            except:
+                api_key = os.getenv('AZURE_LLM_API_KEY')
+            
             if not api_key or not url:
                 raise Exception("AZURE_LLM_ENDPOINT or AZURE_LLM_API_KEY secrets are not set.")
 

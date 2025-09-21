@@ -1,8 +1,11 @@
 [server]
-port = 8501
+port = 8000
 headless = true
-enableCORS = false
+enableCORS = true
 enableXsrfProtection = false
+maxUploadSize = 200
+maxMessageSize = 200
+address = "0.0.0.0"
 
 [browser]
 gatherUsageStats = false
@@ -12,3 +15,6 @@ primaryColor = "#1f77b4"
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f0f2f6"
 textColor = "#262730"
+
+[logger]
+level = "info"

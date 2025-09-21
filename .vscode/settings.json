@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/0e16c5e9-29d5-4b70-806b-e615e518f7fe/resourceGroups/streamlit/providers/Microsoft.Web/sites/benstreamlit101",
+    "appService.deploySubpath": "."
+}
