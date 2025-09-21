@@ -1,0 +1,11 @@
+AZURE STARTUP COMMAND (Copy and paste this into Azure Portal):
+
+python3 -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0
+
+Instructions:
+1. Go to Azure Portal → Your Web App → Settings → Configuration → General settings
+2. Paste the command above into the "Startup Command" field
+3. Click Save
+4. Restart your app
+
+This bypasses all script path issues and runs Streamlit directly.

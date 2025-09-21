@@ -58,9 +58,27 @@ git push azure main
 
 ## Step 3: Configure Startup Command
 
+### Option 1: Direct command (Recommended - Use This First!)
 1. Go to Azure Portal → Your Web App → Settings → Configuration → General settings
-2. Set **Startup Command** to: `run.sh`
+2. Set **Startup Command** to: `python3 -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0`
 3. Click **Save**
+
+**This is the most reliable method and bypasses all script path issues.**
+
+### Option 2: Using startup.py
+1. Go to Azure Portal → Your Web App → Settings → Configuration → General settings
+2. Set **Startup Command** to: `python3 startup.py`
+3. Click **Save**
+
+### Option 3: Using startup.sh
+1. Go to Azure Portal → Your Web App → Settings → Configuration → General settings
+2. Set **Startup Command** to: `startup.sh`
+3. Click **Save**
+
+### Important Notes:
+- **Use Option 1 (Direct command) first** - it's the most reliable
+- Make sure you're using **Linux App Service** (not Windows)
+- The startup command should be set in **General settings**, not **Application settings**
 
 ## Step 4: Set Environment Variables
 
@@ -82,10 +100,13 @@ In Azure Portal → Your Web App → Settings → Configuration → Application 
 
 ```
 /
-├── streamlit.py              # Main Streamlit application
+├── app.py                    # Main Streamlit application
+├── startup.py                # Azure startup script (Python)
+├── startup.sh                # Azure startup script (Bash)
 ├── config.py                 # Configuration constants
 ├── run.sh                    # Linux startup script
 ├── requirements.txt          # Python dependencies
+├── web.config               # Windows App Service config
 └── .streamlit/
     └── config.toml          # Streamlit configuration
 ```
@@ -95,7 +116,29 @@ In Azure Portal → Your Web App → Settings → Configuration → Application 
 ### run.sh
 ```bash
 #!/bin/bash
-python -m streamlit run streamlit.py --server.port 8000 --server.address 0.0.0.0
+python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0
+```
+
+### startup.py
+```python
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+
+def main():
+    os.environ['STREAMLIT_SERVER_PORT'] = '8000'
+    os.environ['STREAMLIT_SERVER_ADDRESS'] = '0.0.0.0'
+    os.environ['STREAMLIT_SERVER_HEADLESS'] = 'true'
+    os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
+    os.environ['STREAMLIT_SERVER_ENABLE_CORS'] = 'true'
+    os.environ['STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION'] = 'false'
+    
+    cmd = [sys.executable, '-m', 'streamlit', 'run', 'app.py', '--server.port', '8000', '--server.address', '0.0.0.0']
+    subprocess.run(cmd, check=True)
+
+if __name__ == '__main__':
+    main()
 ```
 
 ### .streamlit/config.toml
@@ -103,7 +146,7 @@ python -m streamlit run streamlit.py --server.port 8000 --server.address 0.0.0.0
 - CORS enabled
 - Address 0.0.0.0 (bind to all interfaces)
 
-### streamlit.py
+### app.py
 - Added `st.set_option('server.enableCORS', True)` as per Microsoft docs
 - Environment variable fallback for Azure deployment
 
@@ -111,16 +154,31 @@ python -m streamlit run streamlit.py --server.port 8000 --server.address 0.0.0.0
 
 ### Common Issues
 
-1. **Still seeing default page**: Ensure you're using Linux App Service, not Windows
-2. **"No module named streamlit"**: Check requirements.txt and deployment logs
-3. **Application Error**: Verify startup command is set to `run.sh`
-4. **CORS errors**: CORS is enabled in both config.toml and streamlit.py
+1. **"startup.sh: not found" or "run.sh: not found"**: 
+   - **IMMEDIATE FIX**: Use the **Direct command** option: `python3 -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0`
+   - This bypasses all script path issues completely
+   - Azure Oryx is looking for scripts in `/opt/startup/` but your files are in `/home/site/wwwroot`
+
+2. **Still seeing default page**: 
+   - Ensure you're using Linux App Service, not Windows
+   - Check that the startup command is set correctly
+
+3. **"No module named streamlit"**: 
+   - Check requirements.txt and deployment logs
+   - Ensure all dependencies are installed
+
+4. **Application Error**: 
+   - Verify startup command is set correctly
+   - Check Azure logs for specific error messages
+
+5. **CORS errors**: 
+   - CORS is enabled in both config.toml and app.py
 
 ### Alternative Startup Command
 
 If `run.sh` doesn't work, try this directly in the startup command field:
 ```bash
-python -m streamlit run streamlit.py --server.port 8000 --server.address 0.0.0.0
+python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0
 ```
 
 ### Check Logs
