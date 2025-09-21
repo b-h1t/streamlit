@@ -25,7 +25,7 @@ def main():
     # Run Streamlit directly
     cmd = [
         sys.executable, '-m', 'streamlit', 'run', 
-        'streamlit.py',
+        'app.py',
         '--server.port', '8000',
         '--server.address', '0.0.0.0',
         '--server.headless', 'true',

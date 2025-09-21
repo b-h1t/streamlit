@@ -107,9 +107,6 @@ def classify_with_model(text_content, model_name):
         "Analyze the following text. First, classify it. "
         "### Categories:\n"
         "1. **Summons**\n"
-        "Analyze the following text. First, classify it. "
-        "### Categories:\n"
-        "1. **Summons**\n"
         "   - A court-issued document notifying a party they are being sued.\n"
         "   - Must contain references to 'Claim Form', 'Claim form', 'sealed Claim Form', or 'Writ' (case-insensitive, even if inside a covering letter).\n"
         "   - May also include terms such as 'Particulars of Claim', 'Defendant Response Pack', or 'Statement of Truth'.\n\n"
@@ -120,7 +117,7 @@ def classify_with_model(text_content, model_name):
         "- If the summons is against the Policy Holder then return 'PH' for the defendant's name.\n"
         "- If there is a section called 'Defendant's Legal Representative' with the name of solicitors then return 'PAN' for the defendant's name.\n"
         "- If the summons is against Admiral, EUI Ltd, or EUI Limited (including variants such as 'EUI Limited (Company Number:...)'), you MUST return exactly 'EUI' for the defendant's name.\n\n"
-        "If it is not a Summons, the 'Description' field should be null."
+        "If it is not a Summons, the 'Description' field should be null.\n"
         "2. **Judgment**\n"
         "   - An official court decision, often titled 'Judgment for Claimant' or 'General Form of Judgment or Order'.\n\n"
         "3. **Solicitor_TP_S152**\n"
@@ -184,7 +181,7 @@ def classify_with_model(text_content, model_name):
                     "input_string": [
                         {
                             "role": "user",
-                            "content": f"{system_prompt}\n{user_prompt_template}"
+                            "content": f"{SYSTEM_PROMPT}\n{user_prompt_template}"
                         }
                     ],
                     "parameters": {
